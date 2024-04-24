@@ -42,6 +42,7 @@ func (q QuestionController) QuestionStream(g *gin.Context) {
 	}
 	c := make(chan []byte, 256)
 	go func() {
+		defer close(c)
 		_, err := config.Llm.Call(g, request, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 			c <- chunk
 			fmt.Println(string(chunk))
@@ -55,9 +56,11 @@ func (q QuestionController) QuestionStream(g *gin.Context) {
 	}()
 	g.Stream(func(w io.Writer) bool {
 		time.Sleep(time.Second)
-		g.SSEvent("message", string(<-c))
-		//todo 错误处理
-		return true
+		if data, ok := <-c; ok {
+			g.SSEvent("message", string(data))
+			return true
+		} else {
+			return false
+		}
 	})
-
 }
