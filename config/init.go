@@ -10,7 +10,7 @@ import (
 var Llm *ollama.LLM
 
 func InitLlm() {
-	llm, err := ollama.New(ollama.WithModel("qwen"))
+	llm, err := ollama.New(ollama.WithModel("qwen:4b"))
 	if err != nil {
 		panic(err)
 	}
