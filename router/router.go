@@ -12,6 +12,7 @@ func RunServer(port string) {
 	group.GET("/questionStream", controller.QuestionController{}.QuestionStream)
 
 	group.POST("/template", controller.TemplateController{}.Template)
+	group.POST("/imagetotext", controller.ImageToTextController{}.ImageToText)
 	err := r.Run(":" + port)
 	if err != nil {
 		panic(err)

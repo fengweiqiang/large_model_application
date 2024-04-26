@@ -11,13 +11,13 @@ import (
 
 type TemplateController struct {
 }
-type TemplateRequest struct {
+type templateRequest struct {
 	Input      string `json:"input"  binding:"required"`
 	OutputLang string `json:"outputLang"  binding:"required"`
 }
 
 func (t TemplateController) Template(ctx *gin.Context) {
-	req := TemplateRequest{}
+	req := templateRequest{}
 	err := ctx.BindJSON(&req)
 	if err != nil {
 		log.Println(err)

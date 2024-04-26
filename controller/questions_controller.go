@@ -14,12 +14,12 @@ import (
 type QuestionController struct {
 }
 
-type QuestionRequest struct {
+type questionRequest struct {
 	Question string `json:"question" binding:"required"`
 }
 
 func (q QuestionController) Question(ctx *gin.Context) {
-	var request QuestionRequest
+	var request questionRequest
 	err := ctx.BindJSON(&request)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
