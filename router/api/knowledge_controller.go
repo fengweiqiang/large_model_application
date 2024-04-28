@@ -56,7 +56,7 @@ func (k KnowledgeController) Knowledge(ctx *gin.Context) {
 		}
 		log.Println(k, len(docs))
 		//查询切割转向量
-		err = util.SaveMilvusEmbedding(ctx, config.MODEL_QWEN4B, docs)
+		err = util.SaveMilvusEmbedding(ctx, config.MODEL_LLAVA7B, docs)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 			return

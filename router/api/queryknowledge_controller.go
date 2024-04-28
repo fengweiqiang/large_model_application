@@ -29,13 +29,13 @@ func (QueryKnowledgeController) QueryKnowledge(ctx *gin.Context) {
 		return
 	}
 
-	llm, err := config.GetLoadLLm(config.MODEL_QWEN4B)
+	llm, err := config.GetLoadLLm(config.MODEL_LLAVA7B)
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	documents, err := util.QueryMilvusEmbedding(ctx, config.MODEL_QWEN4B, req.Question)
+	documents, err := util.QueryMilvusEmbedding(ctx, config.MODEL_LLAVA7B, req.Question)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

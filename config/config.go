@@ -22,7 +22,7 @@ const (
 )
 
 func InitLlm() {
-	llm, err := ollama.New(ollama.WithModel(MODEL_QWEN4B.ToString()))
+	llm, err := ollama.New(ollama.WithModel(MODEL_LLAVA7B.ToString()))
 	if err != nil {
 		panic(err)
 	}
@@ -30,7 +30,7 @@ func InitLlm() {
 	if err != nil {
 		panic(err)
 	}
-	log.Printf("llm response: %s", response)
+	log.Printf("llm response: %s\n", response)
 	Llm = llm
 }
 func GetLoadLLm(model MODEL) (*ollama.LLM, error) {
