@@ -1,4 +1,4 @@
-package controller
+package api
 
 import (
 	"gitee.com/fengweiqiang/largeModel/config"

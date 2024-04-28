@@ -11,9 +11,9 @@
 
 - [x] 大模型翻译器功能demo
 - [x] 图片转文字demo `(ollama run llava:7b)`
-- [ ] 切分数据
-- [ ] 建立知识库，使用内嵌模型解析成向量数据存入milvus向量数据库
-- [ ] 让大模型具备知识库的能力，对大模型提问知识库内容
+- [x] 切分数据demo
+- [x] 建立知识库，使用内嵌模型解析成向量数据存入milvus向量数据库
+- [x] 让大模型具备知识库的能力，对大模型提问知识库内容
 
 ## api
 https://console-docs.apipost.cn/preview/4a6af016b75237d8/80e5a02e5d8c2d59
