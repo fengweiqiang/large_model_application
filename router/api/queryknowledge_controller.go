@@ -7,7 +7,6 @@ import (
 	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/memory"
-	"log"
 	"net/http"
 )
 
@@ -16,8 +15,8 @@ type QueryKnowledgeController struct {
 }
 
 type queryKnowledgeRequest struct {
-	//Title    string `json:"title" binding:"required"`
-	Question string `json:"question" binding:"required"`
+	ModelId  util.DBCollection `json:"modelId" binding:"required"`
+	Question string            `json:"question" binding:"required"`
 }
 
 func (QueryKnowledgeController) QueryKnowledge(ctx *gin.Context) {
@@ -28,14 +27,7 @@ func (QueryKnowledgeController) QueryKnowledge(ctx *gin.Context) {
 		})
 		return
 	}
-
-	llm, err := config.GetLoadLLm(config.MODEL_LLAVA7B)
-	if err != nil {
-		log.Println(err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	documents, err := util.QueryMilvusEmbedding(ctx, config.MODEL_LLAVA7B, req.Question)
+	documents, err := util.QueryMilvusEmbedding(ctx, config.MODEL_LLAVA7B, req.ModelId, req.Question)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -51,7 +43,7 @@ func (QueryKnowledgeController) QueryKnowledge(ctx *gin.Context) {
 
 	conversation := memory.NewConversationBuffer(memory.WithChatHistory(history))
 	executor := agents.NewExecutor(
-		agents.NewConversationalAgent(llm, nil),
+		agents.NewConversationalAgent(config.Llm, nil),
 		nil,
 		agents.WithMemory(conversation),
 	)

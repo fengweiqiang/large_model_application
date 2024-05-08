@@ -11,13 +11,24 @@ import (
 	"log"
 )
 
-func SaveMilvusEmbedding(ctx context.Context, model config.MODEL, docs []schema.Document) error {
-	store, err := loadStore(ctx, model)
+type DBCollection string
+
+func (c DBCollection) ToString() string {
+	return string(c)
+}
+
+const (
+	DB_COLLECTION_LOCAL_FILE DBCollection = "local_file"
+	DB_COLLECTION_URL        DBCollection = "url"
+)
+
+func SaveMilvusEmbedding(ctx context.Context, model config.MODEL, collection DBCollection, docs []schema.Document) error {
+	//文档放入不同的集合里
+	store, err := loadStore(ctx, &model, collection.ToString())
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-
 	documents, err := store.AddDocuments(ctx, docs)
 	if err != nil {
 		log.Println(err)
@@ -27,8 +38,8 @@ func SaveMilvusEmbedding(ctx context.Context, model config.MODEL, docs []schema.
 	return nil
 }
 
-func QueryMilvusEmbedding(ctx context.Context, model config.MODEL, prompt string) (docs []schema.Document, err error) {
-	store, err := loadStore(ctx, model)
+func QueryMilvusEmbedding(ctx context.Context, model config.MODEL, collection DBCollection, prompt string) (docs []schema.Document, err error) {
+	store, err := loadStore(ctx, &model, collection.ToString())
 	if err != nil {
 		log.Println(err)
 		return []schema.Document{}, err
@@ -41,11 +52,15 @@ func QueryMilvusEmbedding(ctx context.Context, model config.MODEL, prompt string
 	return docRetrieved, nil
 }
 
-func loadStore(ctx context.Context, model config.MODEL) (milvus.Store, error) {
-	llm, err := config.GetLoadLLm(model)
-	if err != nil {
-		log.Println(err)
-		return milvus.Store{}, err
+func loadStore(ctx context.Context, model *config.MODEL, collection string) (milvus.Store, error) {
+	llm := config.Llm
+	var err error
+	if model != nil {
+		llm, err = config.GetLoadLLm(*model)
+		if err != nil {
+			log.Println(err)
+			return milvus.Store{}, err
+		}
 	}
 
 	embedder, err := embeddings.NewEmbedder(llm)
@@ -57,7 +72,7 @@ func loadStore(ctx context.Context, model config.MODEL) (milvus.Store, error) {
 		Address: config.MilieusDBAddress,
 	}
 	autoindex, _ := entity.NewIndexAUTOINDEX(entity.L2)
-	store, err := milvus.New(ctx, clientConfig, milvus.WithEmbedder(embedder), milvus.WithIndex(autoindex))
+	store, err := milvus.New(ctx, clientConfig, milvus.WithEmbedder(embedder), milvus.WithIndex(autoindex), milvus.WithCollectionName(collection))
 	if err != nil {
 		log.Println(err)
 		return milvus.Store{}, err
