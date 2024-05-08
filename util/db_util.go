@@ -2,10 +2,12 @@ package util
 
 import (
 	"context"
+	"fmt"
 	"gitee.com/fengweiqiang/largeModel/config"
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/llms/ollama"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores/milvus"
 	"log"
@@ -18,13 +20,24 @@ func (c DBCollection) ToString() string {
 }
 
 const (
+	MODEL_EMBEDDER                        = "nomic-embed-text:latest"
 	DB_COLLECTION_LOCAL_FILE DBCollection = "local_file"
 	DB_COLLECTION_URL        DBCollection = "url"
 )
 
-func SaveMilvusEmbedding(ctx context.Context, model config.MODEL, collection DBCollection, docs []schema.Document) error {
+var model_embedder_llm *ollama.LLM
+
+func init() {
+	llm, err := config.GetLoadLLm(MODEL_EMBEDDER)
+	if err != nil {
+		panic(err)
+	}
+	model_embedder_llm = llm
+
+}
+func SaveMilvusEmbedding(ctx context.Context, collection DBCollection, docs []schema.Document) error {
 	//文档放入不同的集合里
-	store, err := loadStore(ctx, &model, collection.ToString())
+	store, err := Store(ctx, collection.ToString())
 	if err != nil {
 		log.Println(err)
 		return err
@@ -38,8 +51,8 @@ func SaveMilvusEmbedding(ctx context.Context, model config.MODEL, collection DBC
 	return nil
 }
 
-func QueryMilvusEmbedding(ctx context.Context, model config.MODEL, collection DBCollection, prompt string) (docs []schema.Document, err error) {
-	store, err := loadStore(ctx, &model, collection.ToString())
+func QueryMilvusEmbedding(ctx context.Context, collection DBCollection, prompt string) (docs []schema.Document, err error) {
+	store, err := Store(ctx, collection.ToString())
 	if err != nil {
 		log.Println(err)
 		return []schema.Document{}, err
@@ -48,22 +61,12 @@ func QueryMilvusEmbedding(ctx context.Context, model config.MODEL, collection DB
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println(docRetrieved)
 	return docRetrieved, nil
 }
 
-func loadStore(ctx context.Context, model *config.MODEL, collection string) (milvus.Store, error) {
-	llm := config.Llm
-	var err error
-	if model != nil {
-		llm, err = config.GetLoadLLm(*model)
-		if err != nil {
-			log.Println(err)
-			return milvus.Store{}, err
-		}
-	}
-
-	embedder, err := embeddings.NewEmbedder(llm)
+func Store(ctx context.Context, collection string) (milvus.Store, error) {
+	embedder, err := embeddings.NewEmbedder(model_embedder_llm)
 	if err != nil {
 		log.Println(err)
 		return milvus.Store{}, err

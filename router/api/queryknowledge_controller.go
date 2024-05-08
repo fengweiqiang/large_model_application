@@ -27,7 +27,7 @@ func (QueryKnowledgeController) QueryKnowledge(ctx *gin.Context) {
 		})
 		return
 	}
-	documents, err := util.QueryMilvusEmbedding(ctx, config.MODEL_LLAVA7B, req.ModelId, req.Question)
+	documents, err := util.QueryMilvusEmbedding(ctx, req.ModelId, req.Question)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"gitee.com/fengweiqiang/largeModel/config"
 	"gitee.com/fengweiqiang/largeModel/util"
 	"github.com/gin-gonic/gin"
 	"github.com/tmc/langchaingo/documentloaders"
@@ -83,9 +82,9 @@ func (k KnowledgeController) Knowledge(ctx *gin.Context) {
 		log.Println(k, len(docs))
 		//查询切割转向量
 		if existURL {
-			err = util.SaveMilvusEmbedding(ctx, config.MODEL_LLAVA7B, util.DB_COLLECTION_URL, docs)
+			err = util.SaveMilvusEmbedding(ctx, util.DB_COLLECTION_URL, docs)
 		} else {
-			err = util.SaveMilvusEmbedding(ctx, config.MODEL_LLAVA7B, util.DB_COLLECTION_LOCAL_FILE, docs)
+			err = util.SaveMilvusEmbedding(ctx, util.DB_COLLECTION_LOCAL_FILE, docs)
 		}
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
